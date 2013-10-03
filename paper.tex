@@ -1,0 +1,150 @@
+\documentclass{llncs}
+
+\usepackage[T1]{fontenc}
+\usepackage[utf8]{inputenc}
+
+%\usepackage{amstex}
+\usepackage{amsmath}
+\usepackage{amssymb}
+
+\usepackage{upgreek}
+
+% Pretty printing of RT-IMP code and specifications
+\usepackage{listings}
+
+\lstdefinelanguage{rtimp}[]{}{
+	morekeywords={component,task,with,is,end,time,if,then,else,elif,while,var,do,done,and,or}
+}
+\lstset{language=rtimp,
+	mathescape=true}
+
+% Formulae presentation
+\usepackage{mathpartir}
+
+
+\author{David Pereira and Luís Miguel Pinho}
+
+\title{A Program Logic for Hierarchical and Periodic Real-Time Systems}
+
+\begin{document}
+
+\maketitle
+
+\begin{abstract}
+Compositionality is a key factor in the development of hard real-time systems, essentially because these systems are now large and complex, many time also built from a set of embedded componets which can have distinct scheduling policies. 
+\end{abstract}
+
+\section{Introduction}
+
+Modern hard Real-Time Systems (RTS) are commonly designed and implemented as a a set of embedded components that interact with the external environment is some predefined way. The real-time guarantees of each embedded component may vary depending on the problem that they are expected to solve. In particular, the scheduling policy and resource consumption policies may vary from component to component and the set of all components must satisfy the global system's requirements.
+
+Typically, RTS are designed and developed in a model-driven way: an abstract model of the system is designed and successively refined and test for errors in the specifications. Moreover, implementation is preferably object oriented for better establishing the isolation and dependability among the components under consideration.
+
+
+%Along the last decade, several authors \cite{} proposed approaches to hierarchical hard RTS analysis, varying essentially in the way that parent components interact with child components in what resource demand and supply is concerned. None of the proposal addresses actual programming code, as they see the components as software black-boxes. This eases real-time scheduling analysis but fails in imposing the necessary non-functional constraints on the structure of the source-code (or machine code) of prossible software implementation. This opens space to inconsistencies between specification and implementation, and in the context of hard RTSs it can lead to potentially catastrophic events.
+
+
+%In this paper we propose a novel program logic that allows to specify, implement, and verify that hard RTSs designed accordingly to a chosen set of hierarchical scheduling rules. It is based on an imperative and component-based programming language and a Hoare-like assertion language capable of expressing non-functional properties of hard RTSs. The main contribution of this work is a rich language that unifies classic imperative program reasoning with other properties that are fundamental to the robust and predictable development of hard RTSs. Such properties include explicit reference to the chosen scheduling algorithm, periods, deadlines, and accurate {\em worst execution time} (WCET) information.
+
+\section{Hierarchical Scheduling}
+
+Hierarchical RTSs are normally subject to analysis in the context of an appropriate {\em Hierarchical Scheduling Framework} (HSF). In a HSF, a hierarchically designed RTS is seen as a tree of components such that a parent node interacts with its child nodes through an interface $I = (G_S,G_D)$, such that $G_S$ is the resource supply of the parent node to a child node and $G_D$ is the resource demand of the child node. Each node is formally defined as the triple $C = (R_C,S_C,W_C)$, such that $R_C$ is a resource model, $S_C$ is a scheduling algorithm, and $W_C$ is a workload model.
+
+\section{Programming Language}
+
+In this section we introduce a new and simple programming language specifically crafted to program RTSs and also to facilitate their formal verification. This new language, which we named IMP-RT, extends the simple imperative programming language IMP \cite{} with hierarchical components, tasks, and statements that interact with execution times.
+The motivation behind the design of IMP-RT is to provide better programming language support for the implementation of hierarchical hard RTSs, {\sl i.e.}, RTSs where a component is seen as a node in a tree who provides resource access to its child nodes. The child node of a component can either be a sub-component or a task. 
+
+Each component is characterized by some real-time properties, namely, it scheduling policy, its period and deadline, and optionally its worst case execution time (WCET). The tasks are characterized similarly, implement some sequential code, and are scheduled according to the policy of the parent component. The syntax of a component is given by the following BNF grammar:
+$$
+C\:::=\:{\sf component}\,name\,{\sf with}\:decls\;specs\;{\sf is}\;[C_1\,\cdots\,C_n]\;T_1\,\cdots\,T_m\:{\sf end}\,name,
+$$
+where $name$ is the component's identifier, $decls$ is a set of local variable declarations, $specs$ is a set of logical and non-functional specifications, $C_i$ are $C$'s sub-components (possibly none), and $T_j$ is a task. Once all the top-level components are completed, we aggregate them to form a RTS. The syntax is the following:
+$$
+Sys\:::=\:{\sf system}\,name\,{\sf with}\:specs_{Sys}\;{\sf is}\;C_1\;\cdots\;C_n\:{\sf end}\,name,
+$$
+where $spec_{Sys}$ is a set of specifications that include the global scheduling policy with respect to all the top-level components. Note that this way of structuring RTSs is fully compliant with the intuition behind the HSFs prosed in \cite{}.
+
+Each component must contain, at least, a task. A task is the entity that is responsible for collecting and computing data, as well as serving as an abstract interface with the external environment (captured by sensor and actuator hardware embedded components). The syntax of tasks is the following:
+$$
+T\:::=\:{\sf task}\,name\,{\sf with}\:decls\;specs\;{\sf is}\;Stmt\;{\sf end}\,name;
+$$
+
+
+
+The non-terminals $decls$, $specs$, and $stms$ describe the syntactical structure of variable declarations, specifications, and programming statements, respectively. 
+
+ component-based, imperative programming language for the programming and specification of RTSs. A RT-IMP program or {\em system} $P$ is a collection of components $C_i$, a scheduling algorithm $S_P$, and optionaly a set of global variables $G_P$. The BNF grammar rules for the top-level structure of a IMP-RT program is the following:
+
+
+Each component $C_i$ must specify its deadline $d_i$ and period $p_i$. Optionally, it can explicitely establish its WCET $w_i$. The body of any task $C_i$ is made of local declarations and imperative, sequential code. No concurrency is allowed in the scope of component. Syntactically, we write a component as follows:
+
+The non-terminal $decl_{C_i}$ refers to local variable declarations, and $spec_{C_i}$ refers to a collection of specifications. The language of both these constructs of IMP-RT is going to be formally introduced below.
+
+\subsection{Types}
+
+In RT-IMP we consider a simple type discipline that include Booleans, natural numbers, integers, floating-point, strings, and record values. The kind of scenarios where programs written in RT-IMP are expected to act are highly complex, so basic safety concern
+
+\subsection{The Sequential Fragment of RT-IMP}
+
+The behavior of a component $C_i$ is implemented as a sequential piece of code. The main difference is that we consider time-consulting and delay statements explicitly in the language. Another difference, is that our sequential fragment considers only terminating loops, and so, the syntactical structure of the loops statement includes an explicit well-founded termination measure.\\
+
+\begin{tabular}{rcl}
+$stmt$ & $::=$ & ${\sf skip}\,|\,x := e\,|\,{\sf time}\,|\,{\sf delay}\,e\,|\,stmt;stmt$\\
+& $|$ & ${\sf if}\,b\,{\sf then}\,stmt\,{\sf else}\,stmt\,|\,{\sf while}\,b\,{\sf var}\,m\,{\sf do}\,stmt\,{\sf done}$
+\end{tabular}\\
+
+The non-terminals $e$ and $b$ refer to, respectively, arithmetic expressions and Boolean expressions, and are defined as usual. The non-terminal $m$ refers to a computable function that evaluates to natural numbers, and that must return a smaller value at each subsequent iteration of the loop. The statements ${\sf delay}$ and ${\sf time}$ interact with the time clock of the complete program. The former delays the execution of the code until the evaluated value of the expression $e$ is reached, whereas the latter simply returns the current point-in-time of the system's execution.
+
+\section{Program Logic}
+
+The assertion language fragment of RT-IMP includes the usual notions of preconditions, postconditions, and loop-invariants. On top of these, it the language considers constructions that refer to non-functional primitives, such as the program's execution time, and also allows to express standard real-time scheduling parameters such as a task's deadline, period, and worst-execution time.
+
+The base of the language is the classic Hoare logic for sequential programs, that is, a first-order language. We adopt $x,y,x_0,y_0,\ldots$ to refer to first-order variables, and the special variable $now$ to denote the system's global clock. The constants $c_i$ denote the $i$-th component of the system, while $d_i$, $p_i$, and $w_i$ denote, respectivelym $i$-th task's deadline, period, and worst-case execution time. The interpretation of variables is performed over natural numbers.
+
+
+\subsection{Running Example}
+
+As a running example to exhibit the characteristics and expressive power of RT-IMP we choose Burns {\sl et. al.}'s Pump Control System (PCS) \cite{}. Each building-block of the PCS will be encoded into a RT-IMP component, with the entities responsible for interacting with the external environment abstracted to special functions. These include the $wl(t)$ and $ml(t)$ denoting the water and methane levels of the mine at $t$ time. The functions {\sf pump\_on} and {\sf pump\_off} denote turning on and off the PCS's water pump, respectively, and the functions {\sf is\_on} and {\sf is\_off} determine the current state of the pump. Furthermore, we use $hwl$, $hll$ to denote the water's highest level and lowest levels allowed for proper execution of the system, and we also use $critical$to refer to the methane level from where danger becomes eminent.  
+
+We start by defining the environment monitoring component. It essentially consists in reading water and methane levels at some predefined constant rate.
+\begin{lstlisting}
+component Env_Monitor with
+is
+ task Read_Levels with 
+  $period$ => 60 ; 
+  $wcet$ => 5
+ is
+  $wl$ := read_water_level;
+  $ml$ := read_methane_level;
+ end Read_Levels;
+end Env_Monitor;
+\end{lstlisting}
+The monitor's code establishes a rate of five time units to execute, and it is expected to compute in at most two time units. The terms {\tt read\_water\_level} and {\tt read\_methane\_level} represent statements that interact with the external environment, doing what their names suggest. Their WCET is expected to be explicitly defined as globals of the program. 
+
+Next, follows the pump's controller code. 
+\begin{lstlisting}
+component Pump
+is
+ task Controller with
+  $deadline$ => 1;
+ is
+  if($wl$ > $whl$ and $ml$ < $critical$ and ${\sf is\_off}$) then 
+   ${\sf pump\_on}$;
+  elif($wl$ $\leq$ $wll$ and ${\sf is\_on}$) then
+   ${\sf pump\_off}$;
+  elif
+
+ end Controller;
+\end{lstlisting}
+
+
+\section{Proof System and Verification Conditions}
+
+\section{$\mathcal{L}$ in Practice}
+
+\section{Conclusions and Future Work}
+
+In this paper we introduced a rich language for the specification and programming of hard real-time systems in a time- and resource-aware hierarquical and compositional way. Programs specified and written in our language are composed of components, and each of those components is made of a set of tasks governed by some prescribed hard real-time scheduling policy. Moreover, there might by different scheduling policies associated to components.
+
+\end{document}
