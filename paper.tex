@@ -50,10 +50,20 @@ Typically, RTS are designed and developed in a model-driven way: an abstract mod
 
 Hierarchical RTSs are normally subject to analysis in the context of an appropriate {\em Hierarchical Scheduling Framework} (HSF). In a HSF, a hierarchically designed RTS is seen as a tree of components such that a parent node interacts with its child nodes through an interface $I = (G_S,G_D)$, such that $G_S$ is the resource supply of the parent node to a child node and $G_D$ is the resource demand of the child node. Each node is formally defined as the triple $C = (R_C,S_C,W_C)$, such that $R_C$ is a resource model, $S_C$ is a scheduling algorithm, and $W_C$ is a workload model.
 
+\section{Structure of Hierarchical RTSs}
+
+In this paper we propose an intermediate verification language where it is possible to specify and program RTSs in an hierarchical way. We shall call this language {\sf HLang} as a shorthand for {\em Hierarchical RTS Language}.
+
+A program in RT-IMP is formed by a collection of {\em component specifications} and their (possible non-existant) {\em component implementations}. Each component specification contains operational signatures -- functions, tasks, local declarations -- and logical information on them. If operational signatures exist in a component specification, then there must also exist the corresponding component implementation. 
+
 \section{Programming Language}
 
 In this section we introduce a new and simple programming language specifically crafted to program RTSs and also to facilitate their formal verification. This new language, which we named IMP-RT, extends the simple imperative programming language IMP \cite{} with hierarchical components, tasks, and statements that interact with execution times.
 The motivation behind the design of IMP-RT is to provide better programming language support for the implementation of hierarchical hard RTSs, {\sl i.e.}, RTSs where a component is seen as a node in a tree who provides resource access to its child nodes. The child node of a component can either be a sub-component or a task. 
+
+
+
+
 
 Each component is characterized by some real-time properties, namely, it scheduling policy, its period and deadline, and optionally its worst case execution time (WCET). The tasks are characterized similarly, implement some sequential code, and are scheduled according to the policy of the parent component. The syntax of a component is given by the following BNF grammar:
 $$
@@ -70,20 +80,16 @@ $$
 T\:::=\:{\sf task}\,name\,{\sf with}\:decls\;specs\;{\sf is}\;Stmt\;{\sf end}\,name;
 $$
 
-
-
 The non-terminals $decls$, $specs$, and $stms$ describe the syntactical structure of variable declarations, specifications, and programming statements, respectively. 
-
- component-based, imperative programming language for the programming and specification of RTSs. A RT-IMP program or {\em system} $P$ is a collection of components $C_i$, a scheduling algorithm $S_P$, and optionaly a set of global variables $G_P$. The BNF grammar rules for the top-level structure of a IMP-RT program is the following:
-
-
-Each component $C_i$ must specify its deadline $d_i$ and period $p_i$. Optionally, it can explicitely establish its WCET $w_i$. The body of any task $C_i$ is made of local declarations and imperative, sequential code. No concurrency is allowed in the scope of component. Syntactically, we write a component as follows:
-
-The non-terminal $decl_{C_i}$ refers to local variable declarations, and $spec_{C_i}$ refers to a collection of specifications. The language of both these constructs of IMP-RT is going to be formally introduced below.
 
 \subsection{Types}
 
-In RT-IMP we consider a simple type discipline that include Booleans, natural numbers, integers, floating-point, strings, and record values. The kind of scenarios where programs written in RT-IMP are expected to act are highly complex, so basic safety concern
+In RT-IMP, we consider a simple type discipline including Booleans, natural numbers, integers, floating-point numbers, and arrays of these types. Moreover, we consider the type of input sensors and output actuators, called {\em ports}, and whose purpose is to interface with the environment. The data values living in these ports are of the types already cited, excluding arrays. The grammars defining RT-IMP types are
+
+$$\alpha\;::=\;{\sf Bool}\,|\,{\sf Natural}\,|\,{\sf Integer}\,|\,{\sf Float},$$
+$$\tau\;::=\;\alpha\,|\,{\sf Array}\langle\alpha\rangle[n]\,|\,{\sf Port},$$
+
+where $n \in \mathbb{N}$ is a fixed size for the array value. The type ${\sf Stream}$ can be either read-only or write-only, depending if it represent a sensor or an actuator. For defining this, we assume the existance of the functions ${\sf Sensor}(addr)$ and ${\sf Actuator}(addr)$ that, respectively, implement connecting to a sensor mapped in memory address $addr$ and connecting to an actuator is some memory address as well.
 
 \subsection{The Sequential Fragment of RT-IMP}
 
